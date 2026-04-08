@@ -15,7 +15,7 @@
     {
       "binding": "DB",
       "database_name": "slimeopolis-db",
-      "database_id": "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+      "database_id": "40e75daf-22fc-47ff-b9f7-f225f2cd93de"
     }
   ],
 
@@ -23,11 +23,11 @@
   "kv_namespaces": [
     {
       "binding": "SESSIONS",
-      "id": "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+      "id": "1a5300aa4d634ead97331aecddba08ef"
     },
     {
       "binding": "PRODUCT_CACHE",
-      "id": "REPLACE_WITH_YOUR_KV_CACHE_NAMESPACE_ID"
+      "id": "49e9c193426a49e482167bf9dcd2b2b1"
     }
   ],
 

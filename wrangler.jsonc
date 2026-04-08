@@ -1,0 +1,62 @@
+{
+  "name": "slimeopolis",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-04-07",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // Static assets served from /public
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS"
+  },
+
+  // D1 — relational data (products, users, orders, cart, reviews)
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "slimeopolis-db",
+      "database_id": "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+    }
+  ],
+
+  // KV — session tokens + product cache
+  "kv_namespaces": [
+    {
+      "binding": "SESSIONS",
+      "id": "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+    },
+    {
+      "binding": "PRODUCT_CACHE",
+      "id": "REPLACE_WITH_YOUR_KV_CACHE_NAMESPACE_ID"
+    }
+  ],
+
+  // R2 — product images
+  "r2_buckets": [
+    {
+      "binding": "IMAGES",
+      "bucket_name": "slimeopolis-images"
+    }
+  ],
+
+  // Analytics Engine — custom business metrics
+  "analytics_engine_datasets": [
+    {
+      "binding": "ANALYTICS",
+      "dataset": "slimeopolis_events"
+    }
+  ],
+
+  // Environment variables (set secrets via: wrangler secret put <KEY>)
+  "vars": {
+    "ENVIRONMENT": "production",
+    "JWT_EXPIRY_SECONDS": "86400",
+    "CORS_ORIGIN": "https://slimeopolis.example.com"
+  }
+
+  // Secrets (set via `wrangler secret put`):
+  //   JWT_SECRET        — used to sign/verify auth tokens
+  //   CF_API_TOKEN      — used by setup-mtls.ts script
+  //   CF_ACCOUNT_ID     — used by setup-mtls.ts script
+  //   CF_ZONE_ID        — used by setup-mtls.ts script
+}

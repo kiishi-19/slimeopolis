@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Cart — Slimeopolis</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+  <script>tailwind.config={theme:{extend:{fontFamily:{display:["Playfair Display","serif"],body:["Inter","sans-serif"]},colors:{slime:{500:"#22c55e",600:"#16a34a",400:"#4ade80"}}}}}</script>
+</head>
+<body class="font-body bg-gray-50 antialiased">
+
+  <nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="/" class="flex items-center gap-2"><span class="text-2xl">🫧</span><span class="font-display font-black text-xl">Slimeopolis</span></a>
+        <div class="flex items-center gap-3">
+          <a href="/cart.html" class="relative p-2 rounded-full bg-gray-100"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg><span id="cart-badge" class="hidden absolute -top-1 -right-1 bg-slime-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold"></span></a>
+          <div id="auth-nav"><a href="/login.html" class="text-sm font-medium px-4 py-2 rounded-full border border-gray-200">Sign in</a></div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
+    <h1 class="font-display font-bold text-4xl mb-8">Your Cart</h1>
+
+    <div id="cart-loading" class="space-y-4">
+      <div class="h-24 rounded-2xl skeleton"></div>
+      <div class="h-24 rounded-2xl skeleton"></div>
+    </div>
+
+    <div id="cart-empty" class="hidden text-center py-20">
+      <div class="text-6xl mb-4">🛒</div>
+      <h2 class="font-display font-bold text-2xl mb-2">Your cart is empty</h2>
+      <p class="text-gray-500 mb-8">Add some slimes from around the world!</p>
+      <a href="/products.html" class="inline-flex items-center gap-2 bg-gray-900 text-white px-8 py-3 rounded-full text-sm font-semibold hover:bg-gray-700 transition-colors">Shop All Slimes</a>
+    </div>
+
+    <div id="cart-content" class="hidden">
+      <div class="grid lg:grid-cols-3 gap-8">
+        <!-- Cart items -->
+        <div class="lg:col-span-2 space-y-4" id="cart-items"></div>
+
+        <!-- Order Summary + Checkout -->
+        <div class="lg:col-span-1">
+          <div class="bg-white rounded-2xl border border-gray-100 p-6 sticky top-24">
+            <h2 class="font-semibold text-lg mb-5">Order Summary</h2>
+            <div class="space-y-3 text-sm mb-5">
+              <div class="flex justify-between text-gray-600"><span>Subtotal</span><span id="summary-subtotal">—</span></div>
+              <div class="flex justify-between text-gray-600"><span>Shipping</span><span class="text-slime-600 font-medium">Free</span></div>
+              <div class="border-t border-gray-100 pt-3 flex justify-between font-semibold text-base"><span>Total</span><span id="summary-total">—</span></div>
+            </div>
+
+            <!-- Checkout form — POST /api/orders (Sequence Analytics final step) -->
+            <form id="checkout-form" class="space-y-3">
+              <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Shipping Details</p>
+              <input type="text" name="shipping_name" placeholder="Full Name" required
+                class="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-slime-400" />
+              <input type="text" name="shipping_address" placeholder="Street Address" required
+                class="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-slime-400" />
+              <div class="grid grid-cols-2 gap-2">
+                <input type="text" name="shipping_city" placeholder="City" required
+                  class="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-slime-400" />
+                <input type="text" name="shipping_postal_code" placeholder="Postal Code" required
+                  class="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-slime-400" />
+              </div>
+              <input type="text" name="shipping_country" placeholder="Country Code (e.g. US)" maxlength="2" required
+                class="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-slime-400 uppercase" />
+              <textarea name="notes" placeholder="Order notes (optional)" rows="2"
+                class="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-slime-400 resize-none"></textarea>
+
+              <div id="checkout-error" class="hidden text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2"></div>
+
+              <button type="submit" id="checkout-btn"
+                class="w-full bg-gray-900 text-white py-3 rounded-xl text-sm font-semibold hover:bg-slime-600 transition-colors mt-2">
+                Place Order
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/assets/js/app.js"></script>
+  <script>
+    let cartData = null;
+
+    async function loadCart() {
+      document.getElementById("cart-loading").classList.remove("hidden");
+      document.getElementById("cart-content").classList.add("hidden");
+      document.getElementById("cart-empty").classList.add("hidden");
+
+      if (!Auth.isLoggedIn()) {
+        document.getElementById("cart-loading").classList.add("hidden");
+        document.getElementById("cart-empty").classList.remove("hidden");
+        return;
+      }
+
+      const { status, data } = await api.get("/cart");
+      document.getElementById("cart-loading").classList.add("hidden");
+
+      if (!data.success || !data.data.items.length) {
+        document.getElementById("cart-empty").classList.remove("hidden");
+        return;
+      }
+
+      cartData = data.data;
+      document.getElementById("cart-content").classList.remove("hidden");
+      renderCartItems(cartData);
+      updateSummary(cartData);
+    }
+
+    function renderCartItems(cart) {
+      const container = document.getElementById("cart-items");
+      container.innerHTML = cart.items.map(item => `
+        <div class="bg-white rounded-2xl border border-gray-100 p-5 flex items-center gap-5" data-item-id="${item.id}">
+          <div class="w-16 h-16 rounded-xl flex-shrink-0 flex items-center justify-center"
+               style="background: radial-gradient(circle at 35% 35%, white 0%, ${item.color_hex || '#86efac'} 100%)"></div>
+          <div class="flex-1 min-w-0">
+            <h3 class="font-semibold text-sm">${escapeHtml(item.name)}</h3>
+            <p class="text-xs text-gray-500 mt-0.5">${countryFlag(item.country_code)} ${escapeHtml(item.country_name)}</p>
+            <p class="text-sm font-bold mt-1">${formatPrice(item.price_cents)}</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button class="qty-btn" onclick="updateQty('${item.id}', ${item.quantity - 1})">−</button>
+            <span class="text-sm font-medium w-8 text-center">${item.quantity}</span>
+            <button class="qty-btn" onclick="updateQty('${item.id}', ${item.quantity + 1})">+</button>
+          </div>
+          <div class="text-right">
+            <p class="font-semibold text-sm">${formatPrice(item.price_cents * item.quantity)}</p>
+            <button onclick="removeItem('${item.id}')" class="text-xs text-red-400 hover:text-red-600 mt-1 transition-colors">Remove</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function updateSummary(cart) {
+      document.getElementById("summary-subtotal").textContent = formatPrice(cart.subtotal_cents);
+      document.getElementById("summary-total").textContent = formatPrice(cart.subtotal_cents);
+    }
+
+    async function updateQty(itemId, newQty) {
+      if (newQty < 1) { removeItem(itemId); return; }
+      const { status, data } = await api.put(`/cart/items/${itemId}`, { quantity: newQty });
+      if (status === 200 && data.success) {
+        await loadCart();
+        await updateCartBadge();
+      } else {
+        showToast(data.error?.message ?? "Failed to update", "error");
+      }
+    }
+
+    async function removeItem(itemId) {
+      const { status, data } = await api.delete(`/cart/items/${itemId}`);
+      if (status === 200 && data.success) {
+        showToast("Item removed", "info");
+        await loadCart();
+        await updateCartBadge();
+      }
+    }
+
+    // Checkout — POST /api/orders (Sequence Analytics final step)
+    document.getElementById("checkout-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("checkout-btn");
+      const errEl = document.getElementById("checkout-error");
+      const fd = new FormData(e.target);
+
+      btn.textContent = "Placing order...";
+      btn.disabled = true;
+      errEl.classList.add("hidden");
+
+      const { status, data } = await api.post("/orders", {
+        shipping_name: fd.get("shipping_name"),
+        shipping_address: fd.get("shipping_address"),
+        shipping_city: fd.get("shipping_city"),
+        shipping_country: fd.get("shipping_country").toUpperCase(),
+        shipping_postal_code: fd.get("shipping_postal_code"),
+        notes: fd.get("notes") || undefined,
+      });
+
+      if ((status === 200 || status === 201) && data.success) {
+        showToast("Order placed! 🎉 Your slimes are on their way.", "success", 5000);
+        setTimeout(() => window.location.href = "/", 2000);
+      } else {
+        errEl.textContent = data.error?.message ?? "Failed to place order";
+        errEl.classList.remove("hidden");
+        btn.textContent = "Place Order";
+        btn.disabled = false;
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", loadCart);
+  </script>
+</body>
+</html>

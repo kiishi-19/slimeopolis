@@ -1,0 +1,757 @@
+openapi: "3.0.3"
+info:
+  title: Slimeopolis API
+  description: |
+    Global Slime Emporium API — Cloudflare API Shield demonstration.
+    Upload this schema to: Security → API Shield → Schema Validation.
+  version: "1.0.0"
+  contact:
+    name: Slimeopolis API
+    url: https://slimeopolis.example.com
+
+servers:
+  - url: https://slimeopolis.example.com/api
+    description: Production (replace with your actual domain)
+
+# ─── Security Schemes ───────────────────────────────────────────────────────────
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT token from /auth/login or /auth/register.
+        API Shield Session Identifier: configure the Authorization header
+        as the session identifier for Volumetric Abuse Detection.
+
+  schemas:
+    # ── Auth ────────────────────────────────────────────────────────────────────
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: jane@example.com
+        password:
+          type: string
+          minLength: 8
+          example: mysecretpassword
+
+    RegisterRequest:
+      type: object
+      required: [email, password, name]
+      properties:
+        email:
+          type: string
+          format: email
+          example: jane@example.com
+        password:
+          type: string
+          minLength: 8
+          example: mysecretpassword
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          example: Jane Doe
+
+    # ── Cart ────────────────────────────────────────────────────────────────────
+    AddCartItemRequest:
+      type: object
+      required: [product_id, quantity]
+      properties:
+        product_id:
+          type: string
+          format: uuid
+          example: prod_jp_001
+        quantity:
+          type: integer
+          minimum: 1
+          maximum: 99
+          example: 2
+
+    UpdateCartItemRequest:
+      type: object
+      required: [quantity]
+      properties:
+        quantity:
+          type: integer
+          minimum: 1
+          maximum: 99
+          example: 3
+
+    # ── Orders ──────────────────────────────────────────────────────────────────
+    CreateOrderRequest:
+      type: object
+      required:
+        - shipping_name
+        - shipping_address
+        - shipping_city
+        - shipping_country
+        - shipping_postal_code
+      properties:
+        shipping_name:
+          type: string
+          minLength: 2
+          maxLength: 200
+          example: Jane Doe
+        shipping_address:
+          type: string
+          minLength: 5
+          maxLength: 500
+          example: 123 Main Street
+        shipping_city:
+          type: string
+          minLength: 2
+          maxLength: 100
+          example: New York
+        shipping_country:
+          type: string
+          minLength: 2
+          maxLength: 2
+          pattern: "^[A-Z]{2}$"
+          example: US
+        shipping_postal_code:
+          type: string
+          minLength: 2
+          maxLength: 20
+          example: "10001"
+        notes:
+          type: string
+          maxLength: 1000
+          example: Please leave at door
+
+    # ── Reviews ─────────────────────────────────────────────────────────────────
+    CreateReviewRequest:
+      type: object
+      required: [rating, title, body]
+      properties:
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 5
+        title:
+          type: string
+          minLength: 3
+          maxLength: 120
+          example: Absolutely love this slime!
+        body:
+          type: string
+          minLength: 10
+          maxLength: 2000
+          example: The sakura scent is incredible. Ships fast, great quality.
+
+    # ── User ────────────────────────────────────────────────────────────────────
+    UpdateProfileRequest:
+      type: object
+      minProperties: 1
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          example: Jane Smith
+        email:
+          type: string
+          format: email
+          example: janew@example.com
+
+    UpdatePreferencesRequest:
+      type: object
+      properties:
+        favorite_countries:
+          type: array
+          items:
+            type: string
+            minLength: 2
+            maxLength: 2
+          example: ["JP", "KR"]
+        favorite_categories:
+          type: array
+          items:
+            type: string
+            enum: [butter, cloud, clear, floam, crunchy, glossy, metallic, glitter, glow, clay]
+          example: ["butter", "clear"]
+
+    # ── Wholesale ───────────────────────────────────────────────────────────────
+    WholesaleOrderItem:
+      type: object
+      required: [product_id, quantity]
+      properties:
+        product_id:
+          type: string
+          example: prod_jp_001
+        quantity:
+          type: integer
+          minimum: 10
+          example: 50
+
+    CreateWholesaleOrderRequest:
+      type: object
+      required: [company_name, tax_id, items]
+      properties:
+        company_name:
+          type: string
+          minLength: 2
+          maxLength: 200
+          example: Acme Slimes Ltd.
+        tax_id:
+          type: string
+          minLength: 2
+          maxLength: 50
+          example: US-123456789
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/WholesaleOrderItem"
+        notes:
+          type: string
+          maxLength: 1000
+          example: Priority processing requested
+
+# ─── Paths ─────────────────────────────────────────────────────────────────────
+
+paths:
+
+  # ── Auth ──────────────────────────────────────────────────────────────────────
+
+  /auth/register:
+    post:
+      operationId: registerUser
+      summary: Register a new user
+      description: |
+        API Shield: Rate Limiting target (5 req/min per IP).
+        Schema Validation: email, password (min 8 chars), name.
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: User registered successfully
+        "409":
+          description: Email already in use
+        "422":
+          description: Validation error
+
+  /auth/login:
+    post:
+      operationId: loginUser
+      summary: Sign in to get a JWT token
+      description: |
+        API Shield: PRIMARY rate limiting target (5 req/min per IP brute-force prevention).
+        Volumetric Abuse Detection: per-session adaptive threshold monitoring.
+        Schema Validation: email format + password presence.
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login successful, returns JWT
+        "401":
+          description: Invalid credentials
+        "422":
+          description: Validation error
+
+  /auth/logout:
+    post:
+      operationId: logoutUser
+      summary: Sign out and revoke current token
+      tags: [Auth]
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Logged out
+
+  /auth/me:
+    get:
+      operationId: getCurrentUser
+      summary: Get current user info
+      tags: [Auth]
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Current user object
+
+  # ── Products ──────────────────────────────────────────────────────────────────
+
+  /products:
+    get:
+      operationId: listProducts
+      summary: List all products with optional filters
+      description: |
+        API Shield: Sequence Analytics step 1 (browse).
+        Schema Validation: query parameter type validation.
+      tags: [Products]
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 12
+        - name: country
+          in: query
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 2
+        - name: category
+          in: query
+          schema:
+            type: string
+            enum: [butter, cloud, clear, floam, crunchy, glossy, metallic, glitter, glow, clay]
+        - name: featured
+          in: query
+          schema:
+            type: string
+            enum: ["true", "false"]
+      responses:
+        "200":
+          description: Paginated product list
+
+  /products/search:
+    get:
+      operationId: searchProducts
+      summary: Full-text search across products
+      description: |
+        API Shield: PRIMARY Volumetric Abuse Detection target.
+        Rate Limiting: 30 req/min per session.
+        Schema Validation: q param is required string.
+      tags: [Products]
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 200
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 10
+      responses:
+        "200":
+          description: Search results
+        "422":
+          description: q parameter required
+
+  /products/{productId}:
+    get:
+      operationId: getProduct
+      summary: Get a product by ID or slug
+      description: |
+        API Shield: Sequence Analytics step 2 (product detail view).
+        Schema Validation: productId path parameter.
+      tags: [Products]
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        "200":
+          description: Product object with reviews
+        "404":
+          description: Product not found
+
+  /products/{productId}/reviews:
+    post:
+      operationId: createReview
+      summary: Post a review for a product
+      description: |
+        API Shield: Schema Validation — rating integer 1-5, title string, body string.
+      tags: [Products]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReviewRequest"
+      responses:
+        "201":
+          description: Review created
+        "409":
+          description: Already reviewed this product
+        "422":
+          description: Validation error
+
+  # ── Cart ──────────────────────────────────────────────────────────────────────
+
+  /cart:
+    get:
+      operationId: getCart
+      summary: Get current user's cart
+      description: |
+        API Shield: Sequence Analytics step 3 (cart view).
+      tags: [Cart]
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Cart contents with line items
+
+    delete:
+      operationId: clearCart
+      summary: Clear all items from cart
+      tags: [Cart]
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Cart cleared
+
+  /cart/items:
+    post:
+      operationId: addCartItem
+      summary: Add an item to cart
+      description: |
+        API Shield: Sequence Analytics step 4 (add to cart).
+        Schema Validation: product_id string, quantity integer min 1.
+      tags: [Cart]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddCartItemRequest"
+      responses:
+        "200":
+          description: Item quantity updated (if already in cart)
+        "201":
+          description: Item added to cart
+        "422":
+          description: Validation error or insufficient stock
+
+  /cart/items/{itemId}:
+    put:
+      operationId: updateCartItem
+      summary: Update quantity of a cart item
+      description: |
+        API Shield: Schema Validation — quantity integer 1-99.
+      tags: [Cart]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCartItemRequest"
+      responses:
+        "200":
+          description: Cart item updated
+
+    delete:
+      operationId: removeCartItem
+      summary: Remove an item from cart
+      tags: [Cart]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Item removed
+
+  # ── Orders ────────────────────────────────────────────────────────────────────
+
+  /orders:
+    get:
+      operationId: listOrders
+      summary: List current user's orders
+      tags: [Orders]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 10
+      responses:
+        "200":
+          description: Paginated order list
+
+    post:
+      operationId: createOrder
+      summary: Place an order from current cart
+      description: |
+        API Shield: FINAL Sequence Analytics step. Only reached legitimately after
+        browse → product view → recommendations → add to cart. Bots that skip
+        directly here are flagged by Sequence Analytics.
+        Rate Limiting: 10 req/min per session.
+        Schema Validation: all shipping fields validated.
+      tags: [Orders]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderRequest"
+      responses:
+        "201":
+          description: Order placed successfully
+        "422":
+          description: Validation error, empty cart, or insufficient stock
+
+  /orders/{orderId}:
+    get:
+      operationId: getOrder
+      summary: Get order details by ID
+      tags: [Orders]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Order with line items
+        "404":
+          description: Order not found
+
+  # ── Recommendations ───────────────────────────────────────────────────────────
+
+  /recommendations:
+    get:
+      operationId: getRecommendations
+      summary: Get product recommendations
+      description: |
+        API Shield: Sequence Analytics — sits between product view and add-to-cart.
+        Legitimate users hit this; bots skip it. Absence in a session's sequence
+        is a signal used by Sequence Analytics to flag anomalous sessions.
+      tags: [Recommendations]
+      parameters:
+        - name: product_id
+          in: query
+          schema:
+            type: string
+        - name: country
+          in: query
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 2
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 8
+            default: 4
+      responses:
+        "200":
+          description: Recommended products
+
+  # ── User ──────────────────────────────────────────────────────────────────────
+
+  /user/profile:
+    get:
+      operationId: getUserProfile
+      summary: Get authenticated user's profile
+      tags: [User]
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: User profile object
+
+    put:
+      operationId: updateUserProfile
+      summary: Update name or email
+      description: |
+        API Shield: Schema Validation — name (string) and email (email format).
+      tags: [User]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileRequest"
+      responses:
+        "200":
+          description: Profile updated
+        "409":
+          description: Email already in use
+
+  /user/preferences:
+    get:
+      operationId: getUserPreferences
+      summary: Get user's saved preferences
+      tags: [User]
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: User preferences
+
+    put:
+      operationId: updateUserPreferences
+      summary: Update country/category preferences
+      tags: [User]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePreferencesRequest"
+      responses:
+        "200":
+          description: Preferences updated
+
+  # ── Wholesale (mTLS Protected) ────────────────────────────────────────────────
+
+  /wholesale/inventory:
+    get:
+      operationId: getWholesaleInventory
+      summary: "[mTLS Required] View full inventory with stock levels"
+      description: |
+        API Shield: PRIMARY mTLS demonstration endpoint.
+        Requires a valid Cloudflare-issued client certificate.
+        Also: Volumetric Abuse Detection for inventory scraping.
+        Schema Validation: query param types.
+        Configure mTLS rule in: Security → API Shield → mTLS
+        Host: your-domain.com, Path: /api/wholesale/*, Action: Block
+      tags: [Wholesale]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: country
+          in: query
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 2
+        - name: category
+          in: query
+          schema:
+            type: string
+            enum: [butter, cloud, clear, floam, crunchy, glossy, metallic, glitter, glow, clay]
+        - name: min_stock
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 10
+      responses:
+        "200":
+          description: Full inventory list with cert metadata
+        "403":
+          description: No valid client certificate or not a wholesale account
+
+  /wholesale/bulk-order:
+    post:
+      operationId: createBulkOrder
+      summary: "[mTLS Required] Place a wholesale bulk order"
+      description: |
+        API Shield: mTLS required + Schema Validation.
+        Validates company_name, tax_id, items array (each with product_id
+        and quantity ≥ 10 units). 30% wholesale discount applied.
+      tags: [Wholesale]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWholesaleOrderRequest"
+      responses:
+        "201":
+          description: Bulk order confirmed with 30% discount
+        "403":
+          description: No valid client certificate or not a wholesale account
+        "422":
+          description: Validation error (e.g. quantity < 10)
+
+tags:
+  - name: Auth
+    description: Authentication — rate limiting + schema validation targets
+  - name: Products
+    description: Products — schema validation + volumetric abuse detection
+  - name: Cart
+    description: Shopping cart — sequence analytics
+  - name: Orders
+    description: Orders — sequence analytics final step + schema validation
+  - name: Recommendations
+    description: Recommendations — sequence analytics mid-step
+  - name: User
+    description: User profile — schema validation + optional mTLS
+  - name: Wholesale
+    description: Wholesale B2B portal — mTLS required

@@ -1,0 +1,27 @@
+{
+  "name": "slimeopolis",
+  "version": "1.0.0",
+  "description": "Global Slime Emporium — Cloudflare API Shield demo app",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:migrate": "wrangler d1 migrations apply slimeopolis-db",
+    "db:migrate:remote": "wrangler d1 migrations apply slimeopolis-db --remote",
+    "db:seed": "wrangler d1 execute slimeopolis-db --file=./migrations/seed.sql",
+    "db:seed:remote": "wrangler d1 execute slimeopolis-db --file=./migrations/seed.sql --remote",
+    "db:reset": "wrangler d1 execute slimeopolis-db --file=./migrations/reset.sql",
+    "type-check": "tsc --noEmit",
+    "setup-mtls": "npx tsx scripts/setup-mtls.ts"
+  },
+  "dependencies": {
+    "hono": "^4.7.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250407.0",
+    "@types/node": "^25.5.2",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.3",
+    "wrangler": "^4.51.0"
+  }
+}

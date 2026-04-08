@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shop All Slimes — Slimeopolis</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { display: ["Playfair Display","serif"], body: ["Inter","sans-serif"] },
+          colors: { slime: { 50:"#f0fdf4",100:"#dcfce7",200:"#bbf7d0",300:"#86efac",400:"#4ade80",500:"#22c55e",600:"#16a34a",700:"#15803d",800:"#166534",900:"#14532d" } }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="font-body bg-gray-50 text-gray-900 antialiased">
+
+  <!-- Nav (same as index) -->
+  <nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="/" class="flex items-center gap-2">
+          <span class="text-2xl">🫧</span>
+          <span class="font-display font-black text-xl tracking-tight">Slimeopolis</span>
+        </a>
+        <div class="hidden md:flex items-center gap-8">
+          <a href="/products.html" class="text-sm font-semibold text-gray-900">Shop</a>
+          <a href="/#countries" class="text-sm font-medium text-gray-600 hover:text-gray-900">Countries</a>
+          <a href="/wholesale.html" class="text-sm font-medium text-gray-600 hover:text-gray-900">Wholesale</a>
+        </div>
+        <div class="flex items-center gap-3">
+          <a href="/cart.html" class="relative p-2 rounded-full hover:bg-gray-100 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+            <span id="cart-badge" class="hidden absolute -top-1 -right-1 bg-slime-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold"></span>
+          </a>
+          <div id="auth-nav"><a href="/login.html" class="text-sm font-medium px-4 py-2 rounded-full border border-gray-200 hover:border-gray-400 transition-colors">Sign in</a></div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
+
+    <!-- Header + Search -->
+    <div class="py-8">
+      <h1 class="font-display font-bold text-4xl mb-2">All Slimes</h1>
+      <p class="text-gray-500 mb-6">24 handcrafted slimes from 8 countries</p>
+
+      <!-- Search bar — triggers GET /api/products/search (volumetric abuse detection target) -->
+      <div class="flex gap-3 max-w-lg">
+        <div class="relative flex-1">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input id="search-input" type="text" placeholder="Search slimes, countries, textures..."
+            class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-slime-400 bg-white" />
+        </div>
+        <button id="search-btn" class="px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-700 transition-colors">Search</button>
+      </div>
+    </div>
+
+    <div class="flex gap-8">
+      <!-- Sidebar Filters -->
+      <aside class="hidden lg:block w-56 shrink-0">
+        <div class="bg-white rounded-2xl border border-gray-100 p-5 sticky top-24">
+          <h3 class="font-semibold text-sm mb-4">Filter</h3>
+
+          <div class="mb-5">
+            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Country</p>
+            <div class="space-y-1">
+              <label class="filter-option"><input type="radio" name="country" value="" checked class="mr-2" /> All Countries</label>
+              <label class="filter-option"><input type="radio" name="country" value="JP" class="mr-2" /> 🇯🇵 Japan</label>
+              <label class="filter-option"><input type="radio" name="country" value="BR" class="mr-2" /> 🇧🇷 Brazil</label>
+              <label class="filter-option"><input type="radio" name="country" value="FR" class="mr-2" /> 🇫🇷 France</label>
+              <label class="filter-option"><input type="radio" name="country" value="KR" class="mr-2" /> 🇰🇷 S. Korea</label>
+              <label class="filter-option"><input type="radio" name="country" value="IN" class="mr-2" /> 🇮🇳 India</label>
+              <label class="filter-option"><input type="radio" name="country" value="AU" class="mr-2" /> 🇦🇺 Australia</label>
+              <label class="filter-option"><input type="radio" name="country" value="MX" class="mr-2" /> 🇲🇽 Mexico</label>
+              <label class="filter-option"><input type="radio" name="country" value="IT" class="mr-2" /> 🇮🇹 Italy</label>
+            </div>
+          </div>
+
+          <div>
+            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Category</p>
+            <div class="space-y-1">
+              <label class="filter-option"><input type="radio" name="category" value="" checked class="mr-2" /> All Types</label>
+              <label class="filter-option"><input type="radio" name="category" value="butter" class="mr-2" /> 🧈 Butter</label>
+              <label class="filter-option"><input type="radio" name="category" value="cloud" class="mr-2" /> ☁️ Cloud</label>
+              <label class="filter-option"><input type="radio" name="category" value="clear" class="mr-2" /> 💎 Clear</label>
+              <label class="filter-option"><input type="radio" name="category" value="glitter" class="mr-2" /> 🌟 Glitter</label>
+              <label class="filter-option"><input type="radio" name="category" value="metallic" class="mr-2" /> 🔮 Metallic</label>
+              <label class="filter-option"><input type="radio" name="category" value="crunchy" class="mr-2" /> 🍿 Crunchy</label>
+              <label class="filter-option"><input type="radio" name="category" value="floam" class="mr-2" /> 🫧 Floam</label>
+              <label class="filter-option"><input type="radio" name="category" value="glow" class="mr-2" /> 💫 Glow</label>
+              <label class="filter-option"><input type="radio" name="category" value="clay" class="mr-2" /> 🏺 Clay</label>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Product Grid -->
+      <div class="flex-1">
+        <div class="flex items-center justify-between mb-6">
+          <p id="result-count" class="text-sm text-gray-500">Loading...</p>
+          <select id="sort-select" class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-slime-400">
+            <option value="">Sort: Default</option>
+            <option value="featured">Featured First</option>
+          </select>
+        </div>
+
+        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+          <!-- Skeletons -->
+          <div class="rounded-2xl bg-white border border-gray-100 h-72 skeleton"></div>
+          <div class="rounded-2xl bg-white border border-gray-100 h-72 skeleton"></div>
+          <div class="rounded-2xl bg-white border border-gray-100 h-72 skeleton"></div>
+          <div class="rounded-2xl bg-white border border-gray-100 h-72 skeleton"></div>
+          <div class="rounded-2xl bg-white border border-gray-100 h-72 skeleton"></div>
+          <div class="rounded-2xl bg-white border border-gray-100 h-72 skeleton"></div>
+        </div>
+
+        <!-- Pagination -->
+        <div id="pagination" class="flex items-center justify-center gap-3 mt-10 hidden">
+          <button id="prev-btn" class="px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">← Prev</button>
+          <span id="page-info" class="text-sm text-gray-500"></span>
+          <button id="next-btn" class="px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">Next →</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <style>
+    .filter-option { display:flex; align-items:center; font-size:0.8125rem; color:#374151; cursor:pointer; padding:0.2rem 0; }
+    .filter-option:hover { color:#111827; }
+  </style>
+
+  <script src="/assets/js/app.js"></script>
+  <script src="/assets/js/products.js"></script>
+</body>
+</html>

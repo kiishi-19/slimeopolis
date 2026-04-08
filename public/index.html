@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Slimeopolis — Global Slime Emporium</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { display: ["Playfair Display", "serif"], body: ["Inter", "sans-serif"] },
+          colors: {
+            slime: {
+              50: "#f0fdf4", 100: "#dcfce7", 200: "#bbf7d0",
+              300: "#86efac", 400: "#4ade80", 500: "#22c55e",
+              600: "#16a34a", 700: "#15803d", 800: "#166534", 900: "#14532d"
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="font-body bg-white text-gray-900 antialiased">
+
+  <!-- ─── Navigation ─────────────────────────────────────────────────────── -->
+  <nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="/" class="flex items-center gap-2">
+          <span class="text-2xl">🫧</span>
+          <span class="font-display font-black text-xl tracking-tight">Slimeopolis</span>
+        </a>
+        <div class="hidden md:flex items-center gap-8">
+          <a href="/products.html" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Shop</a>
+          <a href="/products.html?featured=true" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Featured</a>
+          <a href="#countries" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Countries</a>
+          <a href="/wholesale.html" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Wholesale</a>
+        </div>
+        <div class="flex items-center gap-3">
+          <a href="/cart.html" class="relative p-2 rounded-full hover:bg-gray-100 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+            </svg>
+            <span id="cart-badge" class="hidden absolute -top-1 -right-1 bg-slime-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold"></span>
+          </a>
+          <div id="auth-nav">
+            <a href="/login.html" class="text-sm font-medium px-4 py-2 rounded-full border border-gray-200 hover:border-gray-400 transition-colors">Sign in</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ─── Hero ───────────────────────────────────────────────────────────── -->
+  <section class="relative min-h-screen flex items-center overflow-hidden pt-16">
+    <!-- Animated blobs -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+      <div class="blob blob-3"></div>
+    </div>
+
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
+      <p class="text-sm font-medium tracking-widest text-slime-600 uppercase mb-4">The world in your hands</p>
+      <h1 class="font-display font-black text-6xl sm:text-7xl lg:text-8xl tracking-tight mb-6 leading-none">
+        Slimes inspired<br />
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-slime-500 to-emerald-400">by every corner</span><br />
+        of the globe
+      </h1>
+      <p class="text-xl text-gray-500 max-w-2xl mx-auto mb-10 font-light leading-relaxed">
+        From Sakura Cloud Slimes of Japan to Carnival Glitter Slimes of Brazil —
+        handcrafted with cultural inspiration from 8 countries.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="/products.html" class="inline-flex items-center gap-2 bg-gray-900 text-white px-8 py-4 rounded-full text-sm font-semibold hover:bg-gray-700 transition-colors">
+          Shop All Slimes
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+          </svg>
+        </a>
+        <a href="#countries" class="inline-flex items-center gap-2 bg-white text-gray-900 px-8 py-4 rounded-full text-sm font-semibold border border-gray-200 hover:border-gray-400 transition-colors">
+          Explore Countries
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Featured Products ──────────────────────────────────────────────── -->
+  <section class="py-24 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-14">
+        <h2 class="font-display font-bold text-4xl mb-3">Staff Picks</h2>
+        <p class="text-gray-500">The world's most irresistible slimes, curated for you</p>
+      </div>
+      <div id="featured-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Populated by JS -->
+        <div class="product-skeleton rounded-2xl bg-gray-200 h-72 animate-pulse"></div>
+        <div class="product-skeleton rounded-2xl bg-gray-200 h-72 animate-pulse"></div>
+        <div class="product-skeleton rounded-2xl bg-gray-200 h-72 animate-pulse"></div>
+        <div class="product-skeleton rounded-2xl bg-gray-200 h-72 animate-pulse"></div>
+      </div>
+      <div class="text-center mt-10">
+        <a href="/products.html" class="inline-flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors">
+          View all slimes →
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Country Explorer ────────────────────────────────────────────────── -->
+  <section id="countries" class="py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-14">
+        <h2 class="font-display font-bold text-4xl mb-3">Explore by Country</h2>
+        <p class="text-gray-500">Every collection tells a cultural story</p>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <!-- Japan -->
+        <a href="/products.html?country=JP" class="country-card group relative overflow-hidden rounded-2xl p-6 text-white cursor-pointer transition-transform hover:scale-105" style="background: linear-gradient(135deg,#FF6B9D,#C154A1)">
+          <div class="text-4xl mb-3">🇯🇵</div>
+          <h3 class="font-display font-bold text-lg">Japan</h3>
+          <p class="text-xs opacity-80 mt-1">Sakura · Matcha · Raindrop</p>
+          <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity text-sm font-semibold">Shop →</div>
+        </a>
+        <!-- Brazil -->
+        <a href="/products.html?country=BR" class="country-card group relative overflow-hidden rounded-2xl p-6 text-white cursor-pointer transition-transform hover:scale-105" style="background: linear-gradient(135deg,#F9C74F,#F77F00)">
+          <div class="text-4xl mb-3">🇧🇷</div>
+          <h3 class="font-display font-bold text-lg">Brazil</h3>
+          <p class="text-xs opacity-80 mt-1">Tropical · Carnival · Amazon</p>
+          <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity text-sm font-semibold">Shop →</div>
+        </a>
+        <!-- France -->
+        <a href="/products.html?country=FR" class="country-card group relative overflow-hidden rounded-2xl p-6 text-white cursor-pointer transition-transform hover:scale-105" style="background: linear-gradient(135deg,#C9B1D9,#7B5EA7)">
+          <div class="text-4xl mb-3">🇫🇷</div>
+          <h3 class="font-display font-bold text-lg">France</h3>
+          <p class="text-xs opacity-80 mt-1">Lavender · Parisian · Crème Brûlée</p>
+          <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity text-sm font-semibold">Shop →</div>
+        </a>
+        <!-- South Korea -->
+        <a href="/products.html?country=KR" class="country-card group relative overflow-hidden rounded-2xl p-6 text-white cursor-pointer transition-transform hover:scale-105" style="background: linear-gradient(135deg,#4CC9F0,#4361EE)">
+          <div class="text-4xl mb-3">🇰🇷</div>
+          <h3 class="font-display font-bold text-lg">South Korea</h3>
+          <p class="text-xs opacity-80 mt-1">K-Pop · Boba Tea · Seoul Neon</p>
+          <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity text-sm font-semibold">Shop →</div>
+        </a>
+        <!-- India -->
+        <a href="/products.html?country=IN" class="country-card group relative overflow-hidden rounded-2xl p-6 text-white cursor-pointer transition-transform hover:scale-105" style="background: linear-gradient(135deg,#FF4D8B,#E4B429)">
+          <div class="text-4xl mb-3">🇮🇳</div>
+          <h3 class="font-display font-bold text-lg">India</h3>
+          <p class="text-xs opacity-80 mt-1">Festival · Turmeric · Monsoon</p>
+          <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity text-sm font-semibold">Shop →</div>
+        </a>
+        <!-- Australia -->
+        <a href="/products.html?country=AU" class="country-card group relative overflow-hidden rounded-2xl p-6 text-white cursor-pointer transition-transform hover:scale-105" style="background: linear-gradient(135deg,#C84B31,#00B4C5)">
+          <div class="text-4xl mb-3">🇦🇺</div>
+          <h3 class="font-display font-bold text-lg">Australia</h3>
+          <p class="text-xs opacity-80 mt-1">Outback · Coral Reef · Eucalyptus</p>
+          <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity text-sm font-semibold">Shop →</div>
+        </a>
+        <!-- Mexico -->
+        <a href="/products.html?country=MX" class="country-card group relative overflow-hidden rounded-2xl p-6 text-white cursor-pointer transition-transform hover:scale-105" style="background: linear-gradient(135deg,#FFB627,#2D6A4F)">
+          <div class="text-4xl mb-3">🇲🇽</div>
+          <h3 class="font-display font-bold text-lg">Mexico</h3>
+          <p class="text-xs opacity-80 mt-1">Fiesta · Oaxacan · Talavera</p>
+          <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity text-sm font-semibold">Shop →</div>
+        </a>
+        <!-- Italy -->
+        <a href="/products.html?country=IT" class="country-card group relative overflow-hidden rounded-2xl p-6 text-white cursor-pointer transition-transform hover:scale-105" style="background: linear-gradient(135deg,#D4956A,#1B4FBE)">
+          <div class="text-4xl mb-3">🇮🇹</div>
+          <h3 class="font-display font-bold text-lg">Italy</h3>
+          <p class="text-xs opacity-80 mt-1">Venetian · Gelato · Tuscan</p>
+          <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity text-sm font-semibold">Shop →</div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── API Shield Callout Banner ──────────────────────────────────────── -->
+  <section class="bg-gray-900 text-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-2 gap-12 items-center">
+        <div>
+          <p class="text-slime-400 text-sm font-medium tracking-widest uppercase mb-3">Built for API Shield</p>
+          <h2 class="font-display font-bold text-3xl mb-4">Every API endpoint is a test surface</h2>
+          <p class="text-gray-400 leading-relaxed">
+            Slimeopolis is architected to demonstrate all five Cloudflare API Shield capabilities.
+            Each route group is designed to exercise a specific protection feature — from schema
+            validation on checkout to mTLS on wholesale endpoints.
+          </p>
+        </div>
+        <div class="grid grid-cols-1 gap-3">
+          <div class="flex items-start gap-3 bg-gray-800 rounded-xl p-4">
+            <span class="text-2xl mt-0.5">🔎</span>
+            <div>
+              <p class="font-semibold text-sm">Schema Validation</p>
+              <p class="text-gray-400 text-xs mt-0.5">/api/auth, /api/cart, /api/orders, /api/products</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3 bg-gray-800 rounded-xl p-4">
+            <span class="text-2xl mt-0.5">🔐</span>
+            <div>
+              <p class="font-semibold text-sm">Mutual TLS (mTLS)</p>
+              <p class="text-gray-400 text-xs mt-0.5">/api/wholesale/inventory, /api/wholesale/bulk-order</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3 bg-gray-800 rounded-xl p-4">
+            <span class="text-2xl mt-0.5">🔗</span>
+            <div>
+              <p class="font-semibold text-sm">Sequence Analytics</p>
+              <p class="text-gray-400 text-xs mt-0.5">browse → product → recommendations → cart → checkout</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3 bg-gray-800 rounded-xl p-4">
+            <span class="text-2xl mt-0.5">⚡</span>
+            <div>
+              <p class="font-semibold text-sm">Rate Limiting + Volumetric Abuse Detection</p>
+              <p class="text-gray-400 text-xs mt-0.5">/api/auth/login, /api/auth/register, /api/products/search</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Footer ─────────────────────────────────────────────────────────── -->
+  <footer class="border-t border-gray-100 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">🫧</span>
+          <span class="font-display font-bold text-lg">Slimeopolis</span>
+          <span class="text-gray-400 text-sm ml-2">API Shield Demo</span>
+        </div>
+        <div class="flex gap-6 text-sm text-gray-500">
+          <a href="/products.html" class="hover:text-gray-900 transition-colors">Shop</a>
+          <a href="/wholesale.html" class="hover:text-gray-900 transition-colors">Wholesale</a>
+          <a href="/login.html" class="hover:text-gray-900 transition-colors">Account</a>
+        </div>
+        <p class="text-xs text-gray-400">Built on Cloudflare Workers · Powered by Hono + D1</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/assets/js/app.js"></script>
+  <script src="/assets/js/home.js"></script>
+</body>
+</html>

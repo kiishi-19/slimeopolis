@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wholesale Portal — Slimeopolis</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+  <script>tailwind.config={theme:{extend:{fontFamily:{display:["Playfair Display","serif"],body:["Inter","sans-serif"]},colors:{slime:{500:"#22c55e",600:"#16a34a",400:"#4ade80"}}}}}</script>
+</head>
+<body class="font-body bg-gray-900 text-white antialiased min-h-screen">
+
+  <nav class="fixed top-0 w-full z-50 bg-gray-900/90 backdrop-blur-md border-b border-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="/" class="flex items-center gap-2"><span class="text-2xl">🫧</span><span class="font-display font-black text-xl">Slimeopolis</span><span class="text-gray-500 text-xs ml-2 border border-gray-700 rounded px-2 py-0.5">WHOLESALE</span></a>
+        <div id="auth-nav"><a href="/login.html" class="text-sm font-medium px-4 py-2 rounded-full border border-gray-700 hover:border-gray-500 transition-colors">Sign in</a></div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
+
+    <!-- mTLS explainer banner -->
+    <div class="bg-amber-900/40 border border-amber-700/50 rounded-2xl p-5 mb-10 flex items-start gap-4">
+      <span class="text-2xl mt-0.5">🔐</span>
+      <div>
+        <p class="font-semibold text-amber-300 text-sm">mTLS Protected Endpoints</p>
+        <p class="text-amber-100/70 text-xs mt-1 leading-relaxed">
+          These wholesale API endpoints (<code class="bg-black/30 px-1 rounded">/api/wholesale/*</code>) require a valid mTLS client certificate.
+          Cloudflare verifies the certificate at the edge before the request reaches the Worker.
+          Without a cert, all requests are blocked with HTTP 403. Configure mTLS in:
+          <strong>Security → API Shield → mTLS</strong>.
+        </p>
+      </div>
+    </div>
+
+    <h1 class="font-display font-bold text-4xl mb-2">Wholesale Portal</h1>
+    <p class="text-gray-400 mb-10">B2B inventory access and bulk ordering — mTLS required</p>
+
+    <!-- Auth gate -->
+    <div id="auth-gate" class="hidden bg-gray-800 rounded-2xl p-10 text-center">
+      <div class="text-5xl mb-4">🔒</div>
+      <h2 class="font-display font-bold text-2xl mb-2">Sign in required</h2>
+      <p class="text-gray-400 mb-6">You must be signed in with a wholesale-approved account.</p>
+      <a href="/login.html" class="inline-flex items-center gap-2 bg-white text-gray-900 px-6 py-3 rounded-full text-sm font-semibold hover:bg-gray-100 transition-colors">Sign In</a>
+    </div>
+
+    <!-- Wholesale content -->
+    <div id="wholesale-content" class="hidden space-y-8">
+
+      <!-- Inventory — GET /api/wholesale/inventory -->
+      <section class="bg-gray-800 rounded-2xl p-6">
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <h2 class="font-semibold text-lg">Live Inventory</h2>
+            <p class="text-gray-400 text-xs mt-0.5"><code class="text-slime-400">GET /api/wholesale/inventory</code></p>
+          </div>
+          <div class="flex gap-2">
+            <select id="inventory-country" class="text-xs bg-gray-700 border border-gray-600 rounded-lg px-3 py-1.5 text-gray-300 focus:outline-none">
+              <option value="">All Countries</option>
+              <option value="JP">🇯🇵 Japan</option>
+              <option value="BR">🇧🇷 Brazil</option>
+              <option value="FR">🇫🇷 France</option>
+              <option value="KR">🇰🇷 S. Korea</option>
+              <option value="IN">🇮🇳 India</option>
+              <option value="AU">🇦🇺 Australia</option>
+              <option value="MX">🇲🇽 Mexico</option>
+              <option value="IT">🇮🇹 Italy</option>
+            </select>
+            <button onclick="loadInventory()" class="text-xs bg-slime-600 hover:bg-slime-500 text-white px-4 py-1.5 rounded-lg transition-colors">Refresh</button>
+          </div>
+        </div>
+
+        <!-- cert info badge -->
+        <div id="cert-info" class="hidden mb-4 text-xs bg-slime-900/40 border border-slime-700/50 rounded-xl px-4 py-3 text-slime-300">
+          <span class="font-semibold">✓ mTLS Verified</span> — <span id="cert-subject">Loading...</span>
+        </div>
+
+        <div id="inventory-loading" class="h-40 rounded-xl skeleton"></div>
+        <div id="inventory-table" class="hidden overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-left text-xs text-gray-500 uppercase tracking-wide border-b border-gray-700">
+                <th class="pb-3 pr-4">Product</th>
+                <th class="pb-3 pr-4">Country</th>
+                <th class="pb-3 pr-4">Category</th>
+                <th class="pb-3 pr-4">Retail</th>
+                <th class="pb-3 pr-4">Wholesale (-30%)</th>
+                <th class="pb-3">Stock</th>
+              </tr>
+            </thead>
+            <tbody id="inventory-rows" class="divide-y divide-gray-700/50"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Bulk Order Form — POST /api/wholesale/bulk-order -->
+      <section class="bg-gray-800 rounded-2xl p-6">
+        <div class="mb-5">
+          <h2 class="font-semibold text-lg">Bulk Order</h2>
+          <p class="text-gray-400 text-xs mt-0.5"><code class="text-slime-400">POST /api/wholesale/bulk-order</code> · Min 10 units per product</p>
+        </div>
+
+        <form id="bulk-order-form" class="space-y-4">
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-gray-400 uppercase tracking-wide mb-1.5">Company Name</label>
+              <input type="text" name="company_name" required
+                class="w-full px-4 py-2.5 rounded-xl bg-gray-700 border border-gray-600 text-sm focus:outline-none focus:ring-2 focus:ring-slime-500 text-white placeholder-gray-500"
+                placeholder="Acme Slimes Ltd." />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-400 uppercase tracking-wide mb-1.5">Tax ID / VAT Number</label>
+              <input type="text" name="tax_id" required
+                class="w-full px-4 py-2.5 rounded-xl bg-gray-700 border border-gray-600 text-sm focus:outline-none focus:ring-2 focus:ring-slime-500 text-white placeholder-gray-500"
+                placeholder="US-123456789" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-gray-400 uppercase tracking-wide mb-1.5">Order Items</label>
+            <div id="order-items" class="space-y-2"></div>
+            <button type="button" onclick="addOrderItem()" class="mt-2 text-xs text-slime-400 hover:text-slime-300 transition-colors">+ Add Product</button>
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-gray-400 uppercase tracking-wide mb-1.5">Notes (optional)</label>
+            <textarea name="notes" rows="2"
+              class="w-full px-4 py-2.5 rounded-xl bg-gray-700 border border-gray-600 text-sm focus:outline-none focus:ring-2 focus:ring-slime-500 text-white placeholder-gray-500 resize-none"
+              placeholder="Special instructions..."></textarea>
+          </div>
+
+          <div id="bulk-error" class="hidden text-xs text-red-400 bg-red-900/30 border border-red-700/50 rounded-lg px-4 py-2.5"></div>
+          <div id="bulk-success" class="hidden text-xs text-slime-400 bg-slime-900/30 border border-slime-700/50 rounded-lg px-4 py-2.5"></div>
+
+          <button type="submit" class="bg-slime-600 hover:bg-slime-500 text-white px-6 py-3 rounded-xl text-sm font-semibold transition-colors">
+            Submit Bulk Order (30% discount applied)
+          </button>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <script src="/assets/js/app.js"></script>
+  <script>
+    let inventoryProducts = [];
+
+    async function loadInventory() {
+      document.getElementById("inventory-loading").classList.remove("hidden");
+      document.getElementById("inventory-table").classList.add("hidden");
+
+      const country = document.getElementById("inventory-country").value;
+      const params = country ? `?country=${country}` : "";
+      const { status, data } = await api.get(`/wholesale/inventory${params}`);
+
+      document.getElementById("inventory-loading").classList.add("hidden");
+
+      if (status === 403) {
+        document.getElementById("wholesale-content").classList.add("hidden");
+        document.getElementById("auth-gate").classList.remove("hidden");
+        showToast(data.error?.message ?? "Wholesale access required", "error");
+        return;
+      }
+
+      if (!data.success) {
+        showToast(data.error?.message ?? "Failed to load inventory", "error");
+        return;
+      }
+
+      inventoryProducts = data.data.inventory;
+
+      // Show cert info
+      if (data.data._cert_info?.subject) {
+        document.getElementById("cert-subject").textContent = `Subject: ${data.data._cert_info.subject}`;
+        document.getElementById("cert-info").classList.remove("hidden");
+      }
+
+      const tbody = document.getElementById("inventory-rows");
+      tbody.innerHTML = inventoryProducts.map(p => `
+        <tr class="text-sm">
+          <td class="py-3 pr-4 font-medium">${escapeHtml(p.name)}</td>
+          <td class="py-3 pr-4 text-gray-400">${countryFlag(p.country_code)} ${escapeHtml(p.country_name)}</td>
+          <td class="py-3 pr-4 text-gray-400">${categoryEmoji(p.category)} ${escapeHtml(p.category)}</td>
+          <td class="py-3 pr-4">${formatPrice(p.price_cents)}</td>
+          <td class="py-3 pr-4 text-slime-400 font-semibold">${formatPrice(Math.floor(p.price_cents * 0.7))}</td>
+          <td class="py-3">
+            <span class="px-2 py-0.5 rounded-full text-xs font-medium ${p.stock_quantity > 50 ? 'bg-green-900/50 text-green-400' : p.stock_quantity > 20 ? 'bg-yellow-900/50 text-yellow-400' : 'bg-red-900/50 text-red-400'}">
+              ${p.stock_quantity} units
+            </span>
+          </td>
+        </tr>
+      `).join("");
+
+      document.getElementById("inventory-table").classList.remove("hidden");
+      populateItemSelects();
+    }
+
+    function populateItemSelects() {
+      document.querySelectorAll(".product-select").forEach(sel => {
+        const currentVal = sel.value;
+        sel.innerHTML = '<option value="">Select product...</option>' +
+          inventoryProducts.map(p => `<option value="${p.id}">${escapeHtml(p.name)} (${p.country_code})</option>`).join("");
+        sel.value = currentVal;
+      });
+    }
+
+    let itemCount = 0;
+    function addOrderItem() {
+      itemCount++;
+      const div = document.createElement("div");
+      div.className = "flex gap-2 items-center";
+      div.innerHTML = `
+        <select class="product-select flex-1 px-3 py-2 rounded-xl bg-gray-700 border border-gray-600 text-sm text-white focus:outline-none focus:ring-2 focus:ring-slime-500">
+          <option value="">Select product...</option>
+          ${inventoryProducts.map(p => `<option value="${p.id}">${escapeHtml(p.name)} (${p.country_code})</option>`).join("")}
+        </select>
+        <input type="number" min="10" placeholder="Qty (min 10)" value="10"
+          class="w-28 px-3 py-2 rounded-xl bg-gray-700 border border-gray-600 text-sm text-white focus:outline-none focus:ring-2 focus:ring-slime-500" />
+        <button type="button" onclick="this.parentElement.remove()" class="text-gray-500 hover:text-red-400 text-lg transition-colors">×</button>
+      `;
+      document.getElementById("order-items").appendChild(div);
+    }
+    addOrderItem(); // Start with one item row
+
+    document.getElementById("bulk-order-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector("button[type=submit]");
+      const errEl = document.getElementById("bulk-error");
+      const succEl = document.getElementById("bulk-success");
+      const fd = new FormData(e.target);
+
+      errEl.classList.add("hidden");
+      succEl.classList.add("hidden");
+      btn.textContent = "Submitting...";
+      btn.disabled = true;
+
+      const items = Array.from(document.querySelectorAll(".product-select")).map((sel, i) => {
+        const qtyInputs = document.querySelectorAll('#order-items input[type="number"]');
+        return { product_id: sel.value, quantity: parseInt(qtyInputs[i]?.value ?? "10") };
+      }).filter(i => i.product_id);
+
+      if (!items.length) {
+        errEl.textContent = "Add at least one product to the order.";
+        errEl.classList.remove("hidden");
+        btn.textContent = "Submit Bulk Order (30% discount applied)";
+        btn.disabled = false;
+        return;
+      }
+
+      const { status, data } = await api.post("/wholesale/bulk-order", {
+        company_name: fd.get("company_name"),
+        tax_id: fd.get("tax_id"),
+        items,
+        notes: fd.get("notes") || undefined,
+      });
+
+      if ((status === 200 || status === 201) && data.success) {
+        succEl.textContent = `✓ Bulk order #${data.data.id.slice(0,8)}... confirmed! Total: ${formatPrice(data.data.total_cents)} (30% discount applied)`;
+        succEl.classList.remove("hidden");
+        loadInventory();
+      } else {
+        errEl.textContent = data.error?.message ?? "Failed to submit order";
+        errEl.classList.remove("hidden");
+      }
+
+      btn.textContent = "Submit Bulk Order (30% discount applied)";
+      btn.disabled = false;
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      updateAuthNav();
+      if (!Auth.isLoggedIn()) {
+        document.getElementById("auth-gate").classList.remove("hidden");
+      } else {
+        document.getElementById("wholesale-content").classList.remove("hidden");
+        loadInventory();
+      }
+    });
+  </script>
+</body>
+</html>

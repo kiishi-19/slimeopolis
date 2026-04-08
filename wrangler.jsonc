@@ -3,6 +3,7 @@
   "main": "src/index.ts",
   "compatibility_date": "2025-04-07",
   "compatibility_flags": ["nodejs_compat"],
+  "account_id": "6bea4abeca519658cb8ba205c96c1f70",
 
   // Static assets served from /public
   "assets": {
@@ -57,6 +58,6 @@
   // Secrets (set via `wrangler secret put`):
   //   JWT_SECRET        — used to sign/verify auth tokens
   //   CF_API_TOKEN      — used by setup-mtls.ts script
-  //   CF_ACCOUNT_ID     — used by setup-mtls.ts script
-  //   CF_ZONE_ID        — used by setup-mtls.ts script
+  //   CF_ACCOUNT_ID     — 6bea4abeca519658cb8ba205c96c1f70
+  //   CF_ZONE_ID        — your zone ID
 }
